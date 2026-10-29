@@ -28,6 +28,11 @@ Built with HTML, CSS, and vanilla JavaScript, PaperForge runs directly in the br
 - Author
 
 ---
+# Screen Shot
+<img src="./images/1.png" style="height: 300px;">
+<img src="./images/2.png" style="height: 300px;">
+<img src="./images/3.png" style="height: 300px;">
+<img src="./images/4.png" style="height: 300px;">
 
 ## Overview
 
