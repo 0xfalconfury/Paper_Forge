@@ -1,0 +1,344 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <title>PaperForge | Question Paper Builder</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Mathematical formula rendering -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- Editable Word document export -->
+  <script defer src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+  <script defer src="script.js"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <a href="#" class="brand">
+      <span class="brand-icon">P</span>
+      <span>
+        <strong>PaperForge</strong>
+        <small>QUESTION PAPER STUDIO</small>
+      </span>
+    </a>
+
+    <div class="top-actions">
+      <span id="saveStatus" class="save-status">● Autosave enabled</span>
+      <button class="btn btn-light" id="saveBtn">Save draft</button>
+      <button class="btn btn-primary" id="exportBtn">Export ▾</button>
+
+      <div id="exportMenu" class="export-menu hidden">
+        <button id="pdfBtn">
+          Print / Save as PDF
+          <small>A4 print layout</small>
+        </button>
+        <button id="wordBtn">
+          Download Word (.docx)
+          <small>Editable document</small>
+        </button>
+        <button id="backupBtn">
+          Download project (.json)
+          <small>Backup all questions</small>
+        </button>
+        <button id="importBtn">
+          Import project (.json)
+          <small>Continue a saved project</small>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="side-label">WORKSPACE</div>
+
+      <button class="nav-link active" data-view="editor">▤ &nbsp; Paper editor</button>
+      <button class="nav-link" data-view="settings">⚙ &nbsp; Page settings</button>
+      <button class="nav-link" data-view="templates">▦ &nbsp; Templates</button>
+
+      <div class="side-divider"></div>
+      <div class="side-label">DOCUMENT OUTLINE</div>
+      <div id="outline" class="outline"></div>
+
+      <div class="sidebar-tip">
+        <strong>✦ Quick tip</strong>
+        <p>Use the Math button to insert LaTeX formulas. Use Print to save a PDF.</p>
+      </div>
+    </aside>
+
+    <section class="main-content">
+      <div id="editorView">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">EXAM DOCUMENT / DRAFT</div>
+            <h1>Question paper editor</h1>
+            <p>Create, format and export a professional examination paper.</p>
+          </div>
+
+          <div class="heading-actions">
+            <button class="btn btn-light" id="addPartBtn">＋ Add part</button>
+            <button class="btn btn-light" id="previewBtn">Preview only</button>
+          </div>
+        </div>
+
+        <div class="editor-grid" id="editorGrid">
+          <div class="editor-column">
+
+            <!-- Institutional metadata -->
+            <section class="card">
+              <div class="card-heading">
+                <span class="step">01</span>
+                <h2>Institution & exam details</h2>
+              </div>
+
+              <div class="logo-row">
+                <div id="logoPreview" class="logo-preview">LOGO</div>
+                <div>
+                  <strong>Institutional logo</strong>
+                  <p>Upload a PNG, JPG, or SVG image.</p>
+                  <label for="logoInput" class="upload-link">Upload logo</label>
+                  <input id="logoInput" type="file" accept="image/*" hidden>
+                  <button id="removeLogoBtn" class="text-btn">Remove</button>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <label class="field full">
+                  Institution name
+                  <input id="institution" value="Bangladesh Army University of Science and Technology">
+                </label>
+
+                <label class="field full">
+                  Department
+                  <input id="department" value="Department of Computer Science and Engineering">
+                </label>
+
+                <label class="field">
+                  Examination title
+                  <input id="examTitle" value="Final Examination, Winter 2026">
+                </label>
+
+                <label class="field">
+                  Level / term
+                  <input id="levelTerm" value="Level-2 Term-II">
+                </label>
+
+                <label class="field">
+                  Course code
+                  <input id="courseCode" value="CSE 2203">
+                </label>
+
+                <label class="field">
+                  Course title
+                  <input id="courseTitle" value="Data Structures and Algorithms">
+                </label>
+
+                <label class="field">
+                  Examination time
+                  <input id="examTime" value="03 (Three) hours">
+                </label>
+
+                <label class="field">
+                  Full marks
+                  <input id="fullMarks" type="number" min="0" value="100">
+                </label>
+              </div>
+            </section>
+
+            <!-- General instructions -->
+            <section class="card">
+              <div class="card-heading between">
+                <div class="heading-title">
+                  <span class="step">02</span>
+                  <h2>General instructions</h2>
+                </div>
+                <button class="btn btn-small" id="addInstructionBtn">＋ Add instruction</button>
+              </div>
+
+              <p class="muted">Manage the notes shown before the questions.</p>
+              <div id="instructionsEditor"></div>
+            </section>
+
+            <!-- Questions -->
+            <section class="card">
+              <div class="card-heading between">
+                <div class="heading-title">
+                  <span class="step">03</span>
+                  <h2>Questions & parts</h2>
+                </div>
+                <span class="count-pill" id="questionCount">0 QUESTIONS</span>
+              </div>
+
+              <div id="partsEditor"></div>
+
+              <button class="add-part-large" id="addPartBottom">
+                <span>＋</span>
+                <span>
+                  <strong>Add another part</strong>
+                  <small>Create Part A, Part B, and more.</small>
+                </span>
+              </button>
+            </section>
+
+            <div class="footer-note">
+              Drafts are saved in this browser.
+              <button id="resetBtn" class="text-btn">Reset sample paper</button>
+            </div>
+          </div>
+
+          <!-- Live A4 preview -->
+          <aside class="preview-column" id="previewColumn">
+            <div class="preview-toolbar">
+              <div>
+                <span class="live-dot"></span>
+                <strong>Live paper preview</strong>
+                <small>A4 document</small>
+              </div>
+
+              <div class="zoom-controls">
+                <button id="zoomOut" aria-label="Zoom out">−</button>
+                <span id="zoomLabel">80%</span>
+                <button id="zoomIn" aria-label="Zoom in">＋</button>
+              </div>
+            </div>
+
+            <div class="paper-stage">
+              <article id="paper" class="paper">
+                <div id="paperContent"></div>
+              </article>
+            </div>
+
+            <div class="preview-footer">
+              PDF pagination may differ slightly by browser. Check Print Preview before distributing.
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Page settings -->
+      <section id="settingsView" class="secondary-view hidden">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">DOCUMENT CONFIGURATION</div>
+            <h1>Page settings</h1>
+            <p>Customize the printable paper layout.</p>
+          </div>
+        </div>
+
+        <section class="card">
+          <div class="card-heading">
+            <span class="step">A</span>
+            <h2>Page setup</h2>
+          </div>
+
+          <div class="form-grid">
+            <label class="field">
+              Paper size
+              <select id="paperSize">
+                <option value="A4">A4</option>
+                <option value="Letter">US Letter</option>
+              </select>
+            </label>
+
+            <label class="field">
+              Orientation
+              <select id="orientation">
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+              </select>
+            </label>
+
+            <label class="field">
+              Font size
+              <select id="fontSize">
+                <option value="10">10 pt</option>
+                <option value="11" selected>11 pt</option>
+                <option value="12">12 pt</option>
+              </select>
+            </label>
+
+            <label class="field">
+              Margins
+              <select id="margins">
+                <option value="narrow">Narrow — 12 mm</option>
+                <option value="standard" selected>Standard — 18 mm</option>
+                <option value="wide">Wide — 25 mm</option>
+              </select>
+            </label>
+          </div>
+          <p class="muted">Print settings are applied when printing. Check the browser's print dialog for final pagination.</p>
+        </section>
+      </section>
+
+      <!-- Templates -->
+      <section id="templatesView" class="secondary-view hidden">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">START FASTER</div>
+            <h1>Templates</h1>
+            <p>Choose a starter format and customize it.</p>
+          </div>
+        </div>
+
+        <div class="template-grid">
+          <button class="template-card" data-template="university">
+            <span class="template-icon">▤</span>
+            <strong>University examination</strong>
+            <p>Institutional header, instructions, parts, questions and CO fields.</p>
+            <span class="template-action">Use template →</span>
+          </button>
+
+          <button class="template-card" data-template="classTest">
+            <span class="template-icon">✎</span>
+            <strong>Class test</strong>
+            <p>A short assessment with a compact header and two questions.</p>
+            <span class="template-action">Use template →</span>
+          </button>
+
+          <button class="template-card" data-template="blank">
+            <span class="template-icon">＋</span>
+            <strong>Blank paper</strong>
+            <p>Start from scratch with an empty part.</p>
+            <span class="template-action">Use template →</span>
+          </button>
+        </div>
+
+        <section class="card">
+          <div class="card-heading">
+            <span class="step">★</span>
+            <h2>Saved header templates</h2>
+          </div>
+          <p class="muted">Save institution details and instructions for reuse.</p>
+          <div class="template-save-row">
+            <input id="templateName" placeholder="Template name">
+            <button id="saveTemplateBtn" class="btn btn-primary">Save current header</button>
+          </div>
+          <div id="savedTemplates"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <input id="projectFile" type="file" accept=".json,application/json" hidden>
+  <div id="toast" class="toast" role="status"></div>
+</body>
+</html>
